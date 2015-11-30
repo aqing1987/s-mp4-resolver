@@ -24,6 +24,7 @@ typedef struct Tag_Stbl_Box {
 
 int AllocStruct_Stbl_Box(Stbl_Box **stblbox);
 int FreeStruct_Stbl_Box(Stbl_Box *stblbox);
+
 int Write_Stbl_Stbl_Box_Video(unsigned char *Buf,
                               unsigned int sample_count_stsz_video,
                               unsigned int *entry_size_stsz_video,

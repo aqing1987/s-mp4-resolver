@@ -20,7 +20,7 @@ extern FILE *pVideo_H264_File;
 extern FILE *pAudio_Aac_File;
 extern FILE *pVideo_Audio_Mp4_File;
 
-FILE *OpenFile(char *FileName, char *OpenMode);
+FILE *OpenFile(const char *FileName, const char *OpenMode);
 void CloseFile(FILE *pFile);
 int ReadFile(FILE *pFile, unsigned char *Buffer, int BufferSize);
 int WriteFile(FILE *pFile, char *Buffer, int BufferSize);

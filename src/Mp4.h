@@ -52,6 +52,7 @@ typedef struct Tag_FullBox_Header {
     unsigned int flags : 24;
 } FullBox_Header;
 
+unsigned int GetDateSeconds();
 int AllocStruct_Box_Header(Box_Header ** boxheader);
 int AllocStruct_FullBox_Box_Header(FullBox_Header ** fullboxheader);
 
