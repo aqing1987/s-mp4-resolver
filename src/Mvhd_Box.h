@@ -42,8 +42,8 @@ typedef struct Tag_Mvhd_Box {
 
     // is a fixed point 8.8 number that indicates the preferred playback
     // volume. 1.0 (0x0100) is full volume.
-    int volume;
-    int reserved;
+    unsigned short volume;
+    unsigned short reserved;
     unsigned int reserved_1[2];
 
     // provides a transformation matrix for the video; (u,v,w) are

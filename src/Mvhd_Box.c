@@ -176,7 +176,9 @@ int Write_Mvhd_Mvhd_Box(unsigned char * Buf, unsigned int timescale,
     Buf[mvhdbox_pos + 2] = (mvhdbox->next_track_ID >> 8) & 0xFF;
     Buf[mvhdbox_pos + 3] = mvhdbox->next_track_ID & 0xFF;
     mvhdbox_pos += 4;
+    
     Write_FullBox_Header(Buf, mvhdbox_pos, 0x00, 0x00);
+    
     //////////////////////////////////////////////////////////////////////////
     FreeStruct_Mvhd_Box(mvhdbox);
     
