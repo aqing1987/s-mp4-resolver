@@ -74,7 +74,7 @@ static int analysis_ftyp_box()
     unsigned int box_size = 0;
     unsigned long remain_size = 0;
 
-    printf("\t=== ftyp start ===\n");
+    printf("\t=== ftyp start (1) ===\n");
 
     get_box_size_type(&box_size);
     remain_size = box_size - sizeof(unsigned int) - sizeof(unsigned int);
@@ -110,7 +110,7 @@ static int analysis_ftyp_box()
     }
     free(rest_buf);
     
-    printf("\t=== ftyp end ===\n\n");
+    printf("\t=== ftyp end (1) ===\n\n");
 
     return 0;
 }
@@ -121,7 +121,7 @@ static int analysis_free_box()
     unsigned int box_size = 0;
     unsigned long remain_size = 0;
 
-    printf("\t=== free box start ===\n");
+    printf("\t=== free box start (2) ===\n");
 
     get_box_size_type(&box_size);
     remain_size = box_size - sizeof(unsigned int) - sizeof(unsigned int);
@@ -138,7 +138,7 @@ static int analysis_free_box()
         free(rest_buf);
     }
 
-    printf("\t=== free box end ===\n\n");
+    printf("\t=== free box end (2) ===\n\n");
     
     return 0;
 }
@@ -149,7 +149,7 @@ static int analysis_mdat_box()
     unsigned int box_size = 0;
     unsigned long remain_size = 0;
 
-    printf("\t=== mdat box start ===\n");
+    printf("\t=== mdat box start (3) ===\n");
 
     get_box_size_type(&box_size);
     remain_size = box_size - sizeof(unsigned int) - sizeof(unsigned int);
@@ -167,7 +167,7 @@ static int analysis_mdat_box()
         }
     }
 
-    printf("\t=== mdat box end ===\n\n");
+    printf("\t=== mdat box end (3) ===\n\n");
 
     return 0;
 }
@@ -179,7 +179,7 @@ static int moov_mvhd_box_ana(unsigned int *moov_remain_bytes)
     unsigned int box_size;
     unsigned int mvhd_remain_bytes;
     
-    printf("\t=== mvhd(in moov) box start ===\n");
+    printf("\t=== mvhd(in moov) box start (4-1) ===\n");
     get_box_size_type(&box_size);
 
     *moov_remain_bytes -= box_size;
@@ -246,7 +246,7 @@ static int moov_mvhd_box_ana(unsigned int *moov_remain_bytes)
     mvhd_remain_bytes -= sizeof(unsigned int);
     printf("mvhd_box_remain bytes = %u\n", mvhd_remain_bytes);
     
-    printf("\t=== mvhd(in moov) box end ===\n");
+    printf("\t=== mvhd(in moov) box end (4-1) ===\n");
 
     return 0;
 }
@@ -258,7 +258,7 @@ static int moov_trak_tkhd_box_ana(unsigned int *trak_remain_bytes)
     unsigned int box_size;
     unsigned int tkhd_remain_bytes;
     
-    printf("\t=== tkhd box start ===\n");
+    printf("\t=== tkhd box start (4-2.3-1) ===\n");
     get_box_size_type(&box_size);
 
     *trak_remain_bytes -= box_size;
@@ -335,13 +335,129 @@ static int moov_trak_tkhd_box_ana(unsigned int *trak_remain_bytes)
     tkhd_remain_bytes -= sizeof(unsigned int);
     printf("tkhd_box_remain bytes = %u\n", tkhd_remain_bytes);
     
-    printf("\t=== tkhd box end ===\n");
+    printf("\t=== tkhd box end (4-2.3-1) ===\n");
     
     return 0;
 }
 
-static int moov_trak_mdia_box_ana()
+static int moov_trak_mdia_mdhd_box_ana(unsigned int *mdia_remain_bytes)
 {
+    Mdhd_Box mdhd_bx;
+    unsigned int box_size;
+    unsigned int mdhd_remain_bytes;
+
+    printf("\t=== mdhd box start (4-2.3-2-1) ===\n");
+    
+    get_box_size_type(&box_size);
+    *mdia_remain_bytes -= box_size;
+    
+    mdhd_remain_bytes = box_size - sizeof(unsigned int) - sizeof(unsigned int);
+    printf("mdhd_box_remain bytes = %u\n", mdhd_remain_bytes);
+
+    // get version & flags
+    unsigned int version_flags = 0;
+    fread(&version_flags, sizeof(unsigned int), 1, g_mp4_info_t.fp);
+    printf("version&falgs = %u (0x%x)\n", ntohl(version_flags), ntohl(version_flags));
+    mdhd_remain_bytes -= sizeof(unsigned int);
+
+    // creation_time
+    fread(&mdhd_bx.creation_time, sizeof(unsigned long), 1, g_mp4_info_t.fp);
+    ulong2time_show(mdhd_bx.creation_time);
+    mdhd_remain_bytes -= sizeof(unsigned long);
+    
+    // modification time
+    fread(&mdhd_bx.modification_time, sizeof(unsigned long), 1, g_mp4_info_t.fp);
+    ulong2time_show(mdhd_bx.modification_time);
+    mdhd_remain_bytes -= sizeof(unsigned long);
+
+    // unsigned int timescale
+    fread(&mdhd_bx.timescale, sizeof(unsigned int), 1, g_mp4_info_t.fp);
+    printf("timescale = %u (0x%x)\n", ntohl(mdhd_bx.timescale), ntohl(mdhd_bx.timescale));
+    mdhd_remain_bytes -= sizeof(unsigned int);
+
+    // unsigned long duration
+    fread(&mdhd_bx.duration, sizeof(unsigned long), 1, g_mp4_info_t.fp);
+    printf("duration = %u (0x%x)\n", ntohl(mdhd_bx.duration), ntohl(mdhd_bx.duration));
+    mdhd_remain_bytes -= sizeof(unsigned long);
+    
+    // language
+    unsigned short lang;
+    fread(&lang, sizeof(unsigned short), 1, g_mp4_info_t.fp);
+    printf("language = %u (0x%x)\n", ntohs(lang), ntohs(lang));
+    mdhd_remain_bytes -= sizeof(unsigned short);
+
+    // pre_defined
+    fread(&mdhd_bx.pre_defined, sizeof(unsigned short), 1, g_mp4_info_t.fp);
+    mdhd_remain_bytes -= sizeof(unsigned short);
+
+    printf("mdhd_box_remain bytes = %u\n", mdhd_remain_bytes);
+    
+    printf("\t=== mdhd box end (4-2.3-2-1) ===\n");
+    
+    return 0;
+}
+
+static int moov_trak_mdia_hdlr_box_ana(unsigned int *mdia_remain_bytes)
+{
+    unsigned int box_size;
+    unsigned int hdlr_remain_bytes;
+
+    printf("\t=== hdlr box start (4-2.3-2-2) ===\n");
+    
+    get_box_size_type(&box_size);
+    *mdia_remain_bytes -= box_size;
+    
+    hdlr_remain_bytes = box_size - sizeof(unsigned int) - sizeof(unsigned int);
+    printf("hdlr_box_remain bytes = %u\n", hdlr_remain_bytes);
+    
+    printf("\t=== hdlr box end (4-2.3-2-2) ===\n");
+    
+    return 0;
+}
+
+static int moov_trak_mdia_minf_box_ana(unsigned int *mdia_remain_bytes)
+{
+    unsigned int box_size;
+    unsigned int minf_remain_bytes;
+
+    printf("\t=== minf box start (4-2.3-2-3) ===\n");
+    
+    get_box_size_type(&box_size);
+    *mdia_remain_bytes -= box_size;
+
+    minf_remain_bytes = box_size - sizeof(unsigned int) - sizeof(unsigned int);
+    printf("minf_box_remain bytes = %u\n", minf_remain_bytes);
+
+    printf("\t=== minf box end (4-2.3-2-3) ===\n");
+    
+    return 0;
+}
+
+
+static int moov_trak_mdia_box_ana(unsigned int *trak_remain_bytes)
+{
+    unsigned int box_size;
+    unsigned int mdia_remain_bytes;
+    
+    printf("\t=== mdia box start (4-2.3-2) ===\n");
+    get_box_size_type(&box_size);
+
+    *trak_remain_bytes -= box_size;
+    
+    mdia_remain_bytes = box_size - sizeof(unsigned int) - sizeof(unsigned int);
+    printf("mdia_box_remain bytes = %u\n", mdia_remain_bytes);
+
+    moov_trak_mdia_mdhd_box_ana(&mdia_remain_bytes);
+    printf("mdia_box_remain bytes = %u\n", mdia_remain_bytes);
+
+    moov_trak_mdia_hdlr_box_ana(&mdia_remain_bytes);
+    printf("mdia_box_remain bytes = %u\n", mdia_remain_bytes);
+
+    moov_trak_mdia_minf_box_ana(&mdia_remain_bytes);
+    printf("mdia_box_remain bytes = %u\n", mdia_remain_bytes);
+
+    printf("\t=== mdia box end (4-2.3-2) ===\n");
+
     return 0;
 }
 
@@ -351,7 +467,7 @@ static int moov_trak_video_box_ana(unsigned int *moov_remain_bytes)
     unsigned int moov_trak_video_remain_bytes;
     unsigned int box_size;
     
-    printf("\t=== trak video box(in moov)start ===\n");
+    printf("\t=== trak video box(in moov)start (4-2) ===\n");
     get_box_size_type(&box_size);
 
     *moov_remain_bytes -= box_size;
@@ -362,7 +478,10 @@ static int moov_trak_video_box_ana(unsigned int *moov_remain_bytes)
     moov_trak_tkhd_box_ana(&moov_trak_video_remain_bytes);
     printf("moov_trak_video_remain_bytes = %u\n", moov_trak_video_remain_bytes);
 
-    printf("\t=== trak video box(in moov)end ===\n");
+    moov_trak_mdia_box_ana(&moov_trak_video_remain_bytes);
+    printf("moov_trak_video_remain_bytes = %u\n", moov_trak_video_remain_bytes);
+
+    printf("\t=== trak video box(in moov)end (4-2) ===\n");
     
     return 0;
 }
@@ -370,6 +489,10 @@ static int moov_trak_video_box_ana(unsigned int *moov_remain_bytes)
 // 4-3
 static int moov_trak_audio_box_ana(unsigned int *moov_remain_bytes)
 {
+    printf("\t=== trak audio box(in moov)start (4-3) ===\n");
+
+    printf("\t=== trak audio box(in moov)end (4-3) ===\n");
+    
     return 0;
 }
 
@@ -379,7 +502,7 @@ static int analysis_moov_box()
     unsigned int box_size = 0;
     unsigned int remain_size = 0;
 
-    printf("\t=== moov box start ===\n");
+    printf("\t=== moov box start (4) ===\n");
 
     get_box_size_type(&box_size);
     remain_size = box_size - sizeof(unsigned int) - sizeof(unsigned int);
@@ -390,6 +513,8 @@ static int analysis_moov_box()
 
     moov_trak_video_box_ana(&remain_size);
     printf("moov_box_remain bytes = %u\n", remain_size);
+
+    printf("\t=== moov box end (4) ===\n");
 
     return 0;
 }

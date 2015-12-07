@@ -42,7 +42,7 @@ typedef struct Tag_Mdhd_Box {
     // confined to being three lower-case letters, these values are
     // strictly positive.
     unsigned char language[3];
-    unsigned int pre_defined;
+    unsigned short pre_defined;
 } Mdhd_Box;
 
 int AllocStruct_Mdhd_Box(Mdhd_Box ** mdhdbox);
