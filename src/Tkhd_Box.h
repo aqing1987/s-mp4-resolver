@@ -51,14 +51,14 @@ typedef struct Tag_Tkhd_Box {
     // the sample durations, converted into the timescale in the Movie
     // Header Box. If the duration of this track cannot be determined then
     // duration is set to all 1s (32-bit maxint).
-    unsigned long duration;
+    unsigned int duration;
     unsigned int reserved_1[2];
 
     // specifies the front-to-back ordering of video tracks; tracks with
     // lower numbers are closer to the viewer. 0 is the normal value,
     // and -1 would be in front of track 0, and so on.
-    int layer;
-    int alternate_group;
+    unsigned short layer;
+    unsigned short alternate_group;
 
     // is a fixed 8.8 value specifying the track's relative audio volume.
     // Full volume is 1.0 (0x0100) and is the normal value. Its value is
@@ -66,8 +66,8 @@ typedef struct Tag_Tkhd_Box {
     // combining them according to their volume, and then using the overall
     // Movie Header Box volume setting; or more complex audio composition
     // (e.g. MPEG-4 BIFS) may be used.
-    int volume;
-    unsigned int reserved_2;
+    unsigned short volume;
+    unsigned short reserved_2;
     int matrix[9];
     // unity matrix
 

@@ -29,7 +29,7 @@ int FreeStruct_Tkhd_Box(Tkhd_Box * tkhdbox)
 int Write_Tkhd_Tkhd_Box_Video(unsigned char * Buf,
                               unsigned int duration_tkhd_video,
                               unsigned int width_tkhd,
-        unsigned int height_tkhd)
+                              unsigned int height_tkhd)
 {
     Tkhd_Box * tkhdbox = NULL;
     unsigned int tkhdbox_pos = 0;
@@ -63,7 +63,6 @@ int Write_Tkhd_Tkhd_Box_Video(unsigned char * Buf,
     tkhdbox_pos += 4;
     // track_ID
     Buf[tkhdbox_pos] = tkhdbox->track_ID >> 24;
-    ;
     Buf[tkhdbox_pos + 1] = (tkhdbox->track_ID >> 16) & 0xFF;
     Buf[tkhdbox_pos + 2] = (tkhdbox->track_ID >> 8) & 0xFF;
     Buf[tkhdbox_pos + 3] = tkhdbox->track_ID & 0xFF;
@@ -100,7 +99,7 @@ int Write_Tkhd_Tkhd_Box_Video(unsigned char * Buf,
     Buf[tkhdbox_pos] = 0x00;
     Buf[tkhdbox_pos + 1] = 0x00;
     tkhdbox_pos += 2;
-    // volume if track_is_audio 0x0100 else 0};
+    // volume if track_is_audio 0x0100 else 0
     Buf[tkhdbox_pos] = 0x00;
     Buf[tkhdbox_pos + 1] = 0x00;
     tkhdbox_pos += 2;
@@ -157,7 +156,6 @@ int Write_Tkhd_Tkhd_Box_Video(unsigned char * Buf,
     
     // width
     Buf[tkhdbox_pos] = tkhdbox->width >> 24;
-    ;
     Buf[tkhdbox_pos + 1] = (tkhdbox->width >> 16) & 0xFF;
     Buf[tkhdbox_pos + 2] = (tkhdbox->width >> 8) & 0xFF;
     Buf[tkhdbox_pos + 3] = tkhdbox->width & 0xFF;
@@ -166,9 +164,8 @@ int Write_Tkhd_Tkhd_Box_Video(unsigned char * Buf,
     Buf[tkhdbox_pos + 1] = 0xd0;
     Buf[tkhdbox_pos + 2] = 0x0;
     Buf[tkhdbox_pos + 3] = 0x0;
-//	printf(" DEBUG width %x %x %x %x\n",Buf[tkhdbox_pos],Buf[tkhdbox_pos+1],Buf[tkhdbox_pos+2],Buf[tkhdbox_pos+3]);
     tkhdbox_pos += 4;
-    //height
+    // height
 //	Buf[tkhdbox_pos] = tkhdbox->height >> 24;;
 //	Buf[tkhdbox_pos + 1] = (tkhdbox->height >> 16) & 0xFF;
 //	Buf[tkhdbox_pos + 2] = (tkhdbox->height >> 8) & 0xFF;

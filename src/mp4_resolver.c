@@ -172,6 +172,7 @@ static int analysis_mdat_box()
     return 0;
 }
 
+// 4-1
 static int moov_mvhd_box_ana(unsigned int *moov_remain_bytes)
 {
     Mvhd_Box mvhd_bx;
@@ -192,63 +193,52 @@ static int moov_mvhd_box_ana(unsigned int *moov_remain_bytes)
     fread(&version_flags, sizeof(unsigned int), 1, g_mp4_info_t.fp);
     printf("version&falgs = %u (0x%x)\n", ntohl(version_flags), ntohl(version_flags));
     mvhd_remain_bytes -= sizeof(unsigned int);
-    printf("mvhd_box_remain bytes = %u\n", mvhd_remain_bytes);
 
     // get date
     fread(&mvhd_bx.creation_time, sizeof(unsigned long), 1, g_mp4_info_t.fp);
     ulong2time_show(mvhd_bx.creation_time);
     mvhd_remain_bytes -= sizeof(unsigned long);
-    printf("mvhd_box_remain bytes = %u\n", mvhd_remain_bytes);
     
     // modification time
     fread(&mvhd_bx.modification_time, sizeof(unsigned long), 1, g_mp4_info_t.fp);
     ulong2time_show(mvhd_bx.modification_time);
     mvhd_remain_bytes -= sizeof(unsigned long);
-    printf("mvhd_box_remain bytes = %u\n", mvhd_remain_bytes);
 
     // timescale
     fread(&mvhd_bx.timescale, sizeof(unsigned int), 1, g_mp4_info_t.fp);
     printf("timescale = %u (0x%x)\n", ntohl(mvhd_bx.timescale), ntohl(mvhd_bx.timescale));
     mvhd_remain_bytes -= sizeof(unsigned int);
-    printf("mvhd_box_remain bytes = %u\n", mvhd_remain_bytes);
 
     // unsigned long duration
     fread(&mvhd_bx.duration, sizeof(unsigned long), 1, g_mp4_info_t.fp);
     printf("duration = %u (0x%x)\n", ntohl(mvhd_bx.duration), ntohl(mvhd_bx.duration));
     mvhd_remain_bytes -= sizeof(unsigned long);
-    printf("mvhd_box_remain bytes = %u\n", mvhd_remain_bytes);
 
     // int rate
     fread(&mvhd_bx.rate, sizeof(int), 1, g_mp4_info_t.fp);
     printf("rate = %u (0x%x)\n", ntohl(mvhd_bx.rate), ntohl(mvhd_bx.rate));
     mvhd_remain_bytes -= sizeof(int);
-    printf("mvhd_box_remain bytes = %u\n", mvhd_remain_bytes);
 
     // unsigned short volume
     fread(&mvhd_bx.volume, sizeof(unsigned short), 1, g_mp4_info_t.fp);
     printf("volume = %u (0x%x)\n", ntohs(mvhd_bx.volume), ntohs(mvhd_bx.volume));
     mvhd_remain_bytes -= sizeof(unsigned short);
-    printf("mvhd_box_remain bytes = %u\n", mvhd_remain_bytes);
 
     // unsigned short reserved
     fread(&mvhd_bx.reserved, sizeof(unsigned short), 1, g_mp4_info_t.fp);
     mvhd_remain_bytes -= sizeof(unsigned short);
-    printf("mvhd_box_remain bytes = %u\n", mvhd_remain_bytes);
 
     // unsigned int reserved_1[2];
     fread(&mvhd_bx.reserved_1[0], sizeof(unsigned int), 2, g_mp4_info_t.fp);
     mvhd_remain_bytes -= 2*sizeof(unsigned int);
-    printf("mvhd_box_remain bytes = %u\n", mvhd_remain_bytes);
 
     // int matrix[9]
     fread(&mvhd_bx.matrix[0], sizeof(int), 9, g_mp4_info_t.fp);
     mvhd_remain_bytes -= 9*sizeof(int);
-    printf("mvhd_box_remain bytes = %u\n", mvhd_remain_bytes);
 
     // unsigned int pre_defined[6]
     fread(&mvhd_bx.pre_defined[0], sizeof(unsigned int), 6, g_mp4_info_t.fp);
     mvhd_remain_bytes -= 6*sizeof(unsigned int);
-    printf("mvhd_box_remain bytes = %u\n", mvhd_remain_bytes);
 
     // unsigned int next_track_ID
     fread(&mvhd_bx.next_track_ID, sizeof(unsigned int), 1, g_mp4_info_t.fp);
@@ -261,14 +251,126 @@ static int moov_mvhd_box_ana(unsigned int *moov_remain_bytes)
     return 0;
 }
 
-static int moov_trak_video_box_ana()
+
+static int moov_trak_tkhd_box_ana(unsigned int *trak_remain_bytes)
 {
+    Tkhd_Box tkhd_bx;
+    unsigned int box_size;
+    unsigned int tkhd_remain_bytes;
     
+    printf("\t=== tkhd box start ===\n");
+    get_box_size_type(&box_size);
+
+    *trak_remain_bytes -= box_size;
+
+    
+    tkhd_remain_bytes = box_size - sizeof(unsigned int) - sizeof(unsigned int);
+    printf("tkhd_box_remain bytes = %u\n", tkhd_remain_bytes);
+
+    unsigned int version_flags = 0;
+    // get version & flags
+    fread(&version_flags, sizeof(unsigned int), 1, g_mp4_info_t.fp);
+    printf("version&falgs = %u (0x%x)\n", ntohl(version_flags), ntohl(version_flags));
+    tkhd_remain_bytes -= sizeof(unsigned int);
+
+    // creation time
+    fread(&tkhd_bx.creation_time, sizeof(unsigned long), 1, g_mp4_info_t.fp);
+    ulong2time_show(tkhd_bx.creation_time);
+    tkhd_remain_bytes -= sizeof(unsigned long);
+    
+    // modification time
+    fread(&tkhd_bx.modification_time, sizeof(unsigned long), 1, g_mp4_info_t.fp);
+    ulong2time_show(tkhd_bx.modification_time);
+    tkhd_remain_bytes -= sizeof(unsigned long);
+
+    // track id
+    fread(&tkhd_bx.track_ID, sizeof(unsigned int), 1, g_mp4_info_t.fp);
+    printf("track_ID = %u (0x%x)\n", ntohl(tkhd_bx.track_ID), ntohl(tkhd_bx.track_ID));
+    tkhd_remain_bytes -= sizeof(unsigned int);
+
+    // reserved
+    fread(&tkhd_bx.reserved, sizeof(unsigned int), 1, g_mp4_info_t.fp);
+    tkhd_remain_bytes -= sizeof(unsigned int);
+
+    // duration
+    fread(&tkhd_bx.duration, sizeof(unsigned int), 1, g_mp4_info_t.fp);
+    printf("duration = %u (0x%x)\n", ntohl(tkhd_bx.duration), ntohl(tkhd_bx.duration));
+    tkhd_remain_bytes -= sizeof(unsigned int);
+
+    // unsigned int reserved_1[2];
+    fread(&tkhd_bx.reserved_1[0], sizeof(unsigned int), 2, g_mp4_info_t.fp);
+    tkhd_remain_bytes -= 2*sizeof(unsigned int);
+
+    // unsigned short layer
+    fread(&tkhd_bx.layer, sizeof(unsigned short), 1, g_mp4_info_t.fp);
+    printf("layer = %u (0x%x)\n", ntohl(tkhd_bx.layer), ntohl(tkhd_bx.layer));
+    tkhd_remain_bytes -= sizeof(unsigned short);
+
+    // unsigned short alternate_group
+    fread(&tkhd_bx.alternate_group, sizeof(unsigned short), 1, g_mp4_info_t.fp);
+    printf("alternate_group = %u (0x%x)\n", ntohl(tkhd_bx.alternate_group), ntohl(tkhd_bx.alternate_group));
+    tkhd_remain_bytes -= sizeof(unsigned short);
+
+    // unsigned short volume
+    fread(&tkhd_bx.volume, sizeof(unsigned short), 1, g_mp4_info_t.fp);
+    printf("volume = %u (0x%x)\n", ntohl(tkhd_bx.volume), ntohl(tkhd_bx.volume));
+    tkhd_remain_bytes -= sizeof(unsigned short);
+
+    // unsigned short reserved_2
+    fread(&tkhd_bx.reserved_2, sizeof(unsigned short), 1, g_mp4_info_t.fp);
+    tkhd_remain_bytes -= sizeof(unsigned short);
+
+    // int matrix[9]
+    fread(&tkhd_bx.matrix[0], sizeof(int), 9, g_mp4_info_t.fp);
+    tkhd_remain_bytes -= 9*sizeof(int);
+
+    // unsigned int width
+    fread(&tkhd_bx.width, sizeof(unsigned int), 1, g_mp4_info_t.fp);
+    printf("width = %u (0x%x)\n", ntohl(tkhd_bx.width), ntohl(tkhd_bx.width));
+    tkhd_remain_bytes -= sizeof(unsigned int);
+
+    // unsigned int height
+    fread(&tkhd_bx.height, sizeof(unsigned int), 1, g_mp4_info_t.fp);
+    printf("height = %u (0x%x)\n", ntohl(tkhd_bx.height), ntohl(tkhd_bx.height));
+    tkhd_remain_bytes -= sizeof(unsigned int);
+    printf("tkhd_box_remain bytes = %u\n", tkhd_remain_bytes);
+    
+    printf("\t=== tkhd box end ===\n");
+    
+    return 0;
 }
 
-static int moov_trak_audio_box_ana()
+static int moov_trak_mdia_box_ana()
 {
+    return 0;
+}
+
+// 4-2
+static int moov_trak_video_box_ana(unsigned int *moov_remain_bytes)
+{
+    unsigned int moov_trak_video_remain_bytes;
+    unsigned int box_size;
     
+    printf("\t=== trak video box(in moov)start ===\n");
+    get_box_size_type(&box_size);
+
+    *moov_remain_bytes -= box_size;
+    
+    moov_trak_video_remain_bytes = box_size - sizeof(unsigned int) - sizeof(unsigned int);
+    printf("moov_trak_video_remain_bytes = %u\n", moov_trak_video_remain_bytes);
+
+    moov_trak_tkhd_box_ana(&moov_trak_video_remain_bytes);
+    printf("moov_trak_video_remain_bytes = %u\n", moov_trak_video_remain_bytes);
+
+    printf("\t=== trak video box(in moov)end ===\n");
+    
+    return 0;
+}
+
+// 4-3
+static int moov_trak_audio_box_ana(unsigned int *moov_remain_bytes)
+{
+    return 0;
 }
 
 // 4
@@ -284,6 +386,9 @@ static int analysis_moov_box()
     printf("moov_box_remain bytes = %u\n", remain_size);
 
     moov_mvhd_box_ana(&remain_size);
+    printf("moov_box_remain bytes = %u\n", remain_size);
+
+    moov_trak_video_box_ana(&remain_size);
     printf("moov_box_remain bytes = %u\n", remain_size);
 
     return 0;
