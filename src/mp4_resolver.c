@@ -23,6 +23,11 @@ typedef struct {
 
 mp4_info_st g_mp4_info_t;
 
+typedef enum {
+    TYPE_VIDEO,
+    TYPE_AUDIO,
+} video_audio_e;
+
 static void show_uint_char(unsigned int val)
 {
     unsigned char buf[4] = "";
@@ -449,7 +454,79 @@ static int moov_trak_mdia_hdlr_box_ana(unsigned int *mdia_remain_bytes)
     return 0;
 }
 
-static int moov_trak_mdia_minf_box_ana(unsigned int *mdia_remain_bytes)
+static int moov_trak_mdia_minf_vmhd_box_ana(unsigned int *minf_remain_bytes)
+{
+    Vmhd_Box vmhd_bx;
+    unsigned int box_size;
+    unsigned int vmhd_remain_bytes;
+
+    printf("\t=== vmhd box start (4-2-2-3-1) ===\n");
+    
+    get_box_size_type(&box_size);
+    *minf_remain_bytes -= box_size;
+
+    vmhd_remain_bytes = box_size - sizeof(unsigned int) - sizeof(unsigned int);
+    printf("vmhd_box_remain bytes = %u\n", vmhd_remain_bytes);
+
+    // get version & flags
+    unsigned int version_flags = 0;
+    fread(&version_flags, sizeof(unsigned int), 1, g_mp4_info_t.fp);
+    printf("version&falgs = %u (0x%x)\n", ntohl(version_flags), ntohl(version_flags));
+    vmhd_remain_bytes -= sizeof(unsigned int);
+
+    // unsigned short graphicsmode
+    fread(&vmhd_bx.graphicsmode, sizeof(unsigned short), 1, g_mp4_info_t.fp);
+    printf("graphicsmode = 0x%x\n", ntohs(vmhd_bx.graphicsmode));
+    vmhd_remain_bytes -= sizeof(unsigned short);
+
+    // unsigned short opcolor[3]
+    fread(&vmhd_bx.opcolor[0], sizeof(unsigned short), 3, g_mp4_info_t.fp);
+    vmhd_remain_bytes -= 3*sizeof(unsigned short);
+
+    printf("vmhd_box_remain bytes = %u\n", vmhd_remain_bytes);
+    printf("\t=== vmhd box end (4-2-2-3-1) ===\n");
+    
+    return 0;
+}
+
+static int moov_trak_mdia_minf_smhd_box_ana(unsigned int *minf_remain_bytes)
+{
+    unsigned int box_size;
+    unsigned int smhd_remain_bytes;
+
+    printf("\t=== smhd box start (4-3-2-3-1) ===\n");
+    
+    get_box_size_type(&box_size);
+    *minf_remain_bytes -= box_size;
+    
+    return 0;
+}
+
+static int moov_trak_mdia_minf_dinf_box_ana(unsigned int *minf_remain_bytes)
+{
+    unsigned int box_size;
+    unsigned int dinf_remain_bytes;
+
+    printf("\t=== minf box start (4-2.3-2-3-2) ===\n");
+
+    
+    
+    return 0;
+}
+
+static int moov_trak_mdia_minf_stbl_box_ana(unsigned int *minf_remain_bytes)
+{
+    unsigned int box_size;
+    unsigned int stbl_remain_bytes;
+
+    printf("\t=== minf box start (4-2.3-2-3-3) ===\n");
+
+    
+    return 0;
+}
+
+
+static int moov_trak_mdia_minf_box_ana(video_audio_e type, unsigned int *mdia_remain_bytes)
 {
     unsigned int box_size;
     unsigned int minf_remain_bytes;
@@ -462,13 +539,23 @@ static int moov_trak_mdia_minf_box_ana(unsigned int *mdia_remain_bytes)
     minf_remain_bytes = box_size - sizeof(unsigned int) - sizeof(unsigned int);
     printf("minf_box_remain bytes = %u\n", minf_remain_bytes);
 
+    if (type == TYPE_VIDEO) {
+        moov_trak_mdia_minf_vmhd_box_ana(&minf_remain_bytes);
+    }
+    else {
+        moov_trak_mdia_minf_smhd_box_ana(&minf_remain_bytes);
+    }
+    printf("minf_box_remain bytes = %u\n", minf_remain_bytes);
+
+    
+
     printf("\t=== minf box end (4-2.3-2-3) ===\n");
     
     return 0;
 }
 
 
-static int moov_trak_mdia_box_ana(unsigned int *trak_remain_bytes)
+static int moov_trak_mdia_box_ana(video_audio_e type, unsigned int *trak_remain_bytes)
 {
     unsigned int box_size;
     unsigned int mdia_remain_bytes;
@@ -487,7 +574,12 @@ static int moov_trak_mdia_box_ana(unsigned int *trak_remain_bytes)
     moov_trak_mdia_hdlr_box_ana(&mdia_remain_bytes);
     printf("mdia_box_remain bytes = %u\n", mdia_remain_bytes);
 
-    moov_trak_mdia_minf_box_ana(&mdia_remain_bytes);
+    if (type == TYPE_VIDEO) {
+        moov_trak_mdia_minf_box_ana(TYPE_VIDEO, &mdia_remain_bytes);
+    }
+    else {
+        moov_trak_mdia_minf_box_ana(TYPE_AUDIO, &mdia_remain_bytes);
+    }
     printf("mdia_box_remain bytes = %u\n", mdia_remain_bytes);
 
     printf("\t=== mdia box end (4-2.3-2) ===\n");
@@ -512,7 +604,7 @@ static int moov_trak_video_box_ana(unsigned int *moov_remain_bytes)
     moov_trak_tkhd_box_ana(&moov_trak_video_remain_bytes);
     printf("moov_trak_video_remain_bytes = %u\n", moov_trak_video_remain_bytes);
 
-    moov_trak_mdia_box_ana(&moov_trak_video_remain_bytes);
+    moov_trak_mdia_box_ana(TYPE_VIDEO, &moov_trak_video_remain_bytes);
     printf("moov_trak_video_remain_bytes = %u\n", moov_trak_video_remain_bytes);
 
     printf("\t=== trak video box(in moov)end (4-2) ===\n");

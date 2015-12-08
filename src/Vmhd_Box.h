@@ -20,10 +20,10 @@ typedef struct Tag_Vmhd_Box {
     // specifies a composition mode for this video track, from the following
     // enumerated set, which may be extended by derived specifications:
     // copy = 0 copy over the existing image
-    unsigned int graphicsmode;
+    unsigned short graphicsmode;
     // is a set of 3 colour values (red, green, blue) available for use
     // by graphics modes
-    unsigned int opcolor[3];
+    unsigned short opcolor[3];
 } Vmhd_Box;
 
 int AllocStruct_Vmhd_Box(Vmhd_Box ** vmhdbox);
