@@ -498,6 +498,8 @@ static int moov_trak_mdia_minf_smhd_box_ana(unsigned int *minf_remain_bytes)
     
     get_box_size_type(&box_size);
     *minf_remain_bytes -= box_size;
+
+    
     
     return 0;
 }
@@ -506,10 +508,43 @@ static int moov_trak_mdia_minf_dinf_box_ana(unsigned int *minf_remain_bytes)
 {
     unsigned int box_size;
     unsigned int dinf_remain_bytes;
+    unsigned int dref_box_size;
+    unsigned int url_box_size;
 
-    printf("\t=== minf box start (4-2.3-2-3-2) ===\n");
+    printf("\t=== dinf box start (4-2.3-2-3-2) ===\n");
 
-    
+    get_box_size_type(&box_size);
+    *minf_remain_bytes -= box_size;
+
+    dinf_remain_bytes = box_size - sizeof(unsigned int) - sizeof(unsigned int);
+    printf("dinf_box_remain bytes = %u\n", dinf_remain_bytes);
+
+    get_box_size_type(&dref_box_size);
+    dinf_remain_bytes -= 2*sizeof(unsigned int);
+
+    // pad
+    unsigned int pad;
+    fread(&pad, sizeof(unsigned int), 1, g_mp4_info_t.fp);
+    dinf_remain_bytes -= sizeof(unsigned int);
+
+    // entry_count
+    unsigned int entry_count;
+    fread(&entry_count, sizeof(unsigned int), 1, g_mp4_info_t.fp);
+    printf("entry_count = 0x%x\n", ntohl(entry_count));
+    dinf_remain_bytes -= sizeof(unsigned int);
+
+    // urlbox
+    get_box_size_type(&url_box_size);
+    dinf_remain_bytes -= 2*sizeof(unsigned int);
+
+    // dummy
+    unsigned int dummy;
+    fread(&dummy, sizeof(unsigned int), 1, g_mp4_info_t.fp);
+    printf("dummy = 0x%x\n", ntohl(dummy));
+    dinf_remain_bytes -= sizeof(unsigned int);
+    printf("dinf_box_remain bytes = %u\n", dinf_remain_bytes);
+
+    printf("\t=== dinf box end (4-2.3-2-3-2) ===\n");
     
     return 0;
 }
@@ -547,7 +582,8 @@ static int moov_trak_mdia_minf_box_ana(video_audio_e type, unsigned int *mdia_re
     }
     printf("minf_box_remain bytes = %u\n", minf_remain_bytes);
 
-    
+    moov_trak_mdia_minf_dinf_box_ana(&minf_remain_bytes);
+    printf("minf_box_remain bytes = %u\n", minf_remain_bytes);
 
     printf("\t=== minf box end (4-2.3-2-3) ===\n");
     
