@@ -44,7 +44,8 @@ static void ulong2time_show(unsigned long val)
     
     time = (time_t)ntohl(val);
     
-    strftime(szBuf, sizeof(szBuf), "%Y-%m-%d %H:%M:%S", localtime(&time));
+    strftime(szBuf, sizeof(szBuf),
+             "%Y-%m-%d %H:%M:%S", localtime(&time));
     printf("%s (0x%x)\n", szBuf, ntohl(val));
 }
 
@@ -399,6 +400,7 @@ static int moov_trak_mdia_mdhd_box_ana(unsigned int *mdia_remain_bytes)
 
 static int moov_trak_mdia_hdlr_box_ana(unsigned int *mdia_remain_bytes)
 {
+    Hdlr_Box hdlr_bx;
     unsigned int box_size;
     unsigned int hdlr_remain_bytes;
 
@@ -408,6 +410,38 @@ static int moov_trak_mdia_hdlr_box_ana(unsigned int *mdia_remain_bytes)
     *mdia_remain_bytes -= box_size;
     
     hdlr_remain_bytes = box_size - sizeof(unsigned int) - sizeof(unsigned int);
+    printf("hdlr_box_remain bytes = %u\n", hdlr_remain_bytes);
+
+    // get version & flags
+    unsigned int version_flags = 0;
+    fread(&version_flags, sizeof(unsigned int), 1, g_mp4_info_t.fp);
+    printf("version&falgs = %u (0x%x)\n", ntohl(version_flags), ntohl(version_flags));
+    hdlr_remain_bytes -= sizeof(unsigned int);
+
+    // unsigned int pre_defined
+    fread(&hdlr_bx.pre_defined, sizeof(unsigned int), 1, g_mp4_info_t.fp);
+    hdlr_remain_bytes -= sizeof(unsigned int);
+
+    // unsigned int handler_type
+    fread(&hdlr_bx.handler_type, sizeof(unsigned int), 1, g_mp4_info_t.fp);
+    printf("handler_type: ");
+    show_uint_char(ntohl(hdlr_bx.handler_type));
+    hdlr_remain_bytes -= sizeof(unsigned int);
+
+    // unsigned int reserved[3]
+    fread(&hdlr_bx.reserved[0], sizeof(unsigned int), 3, g_mp4_info_t.fp);
+    hdlr_remain_bytes -= 3*sizeof(unsigned int);
+
+    // name
+    unsigned char t_name[6];
+    fread(t_name, sizeof(unsigned char), 6, g_mp4_info_t.fp);
+    hdlr_remain_bytes -= 6*sizeof(unsigned char);
+    printf("name: ");
+    int i = 0;
+    for (i = 0; i < 6; i++) {
+        printf("%c", t_name[i]);
+    }
+    printf("\n");
     printf("hdlr_box_remain bytes = %u\n", hdlr_remain_bytes);
     
     printf("\t=== hdlr box end (4-2.3-2-2) ===\n");
